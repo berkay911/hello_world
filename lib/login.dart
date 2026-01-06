@@ -1,14 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hello_world/myHomePage.dart';
+import 'auth.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Hello World")),
-      body: Body(),
+      appBar: AppBar(title: const Text('Hello World!')),
+      body: const Body(),
     );
   }
 }
@@ -21,40 +21,59 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  String name = "";
-  TextEditingController controller = new TextEditingController();
+  User? user;
 
-  void click() {
-    this.name = controller.text;
+  @override
+  void initState() {
+    super.initState();
+    signOutGoogle();
+  }
+
+  Future<void> click() async {
+    final User? result = await signInWithGoogle();
+
+    if (result == null) return;
+
+    setState(() {
+      user = result;
+    });
+
+    if (!mounted) return;
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MyHomePage(this.name)),
+      MaterialPageRoute(
+        builder: (context) => MyHomePage(result.displayName ?? ''),
+      ),
+    );
+  }
+
+  Widget googleLoginButton() {
+    return OutlinedButton(
+      onPressed: click,
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(45)),
+        side: const BorderSide(color: Colors.grey),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Image(image: AssetImage('assets/google_logo.png'), height: 35),
+            SizedBox(width: 10),
+            Text(
+              'Sign in with Google',
+              style: TextStyle(color: Colors.grey, fontSize: 20),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: TextField(
-          controller: this.controller,
-          decoration: InputDecoration(
-            prefixIcon: Icon(Icons.person),
-            labelText: "Enter your name",
-            border: OutlineInputBorder(
-              borderSide: BorderSide(width: 5, color: Colors.pink),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(Icons.done),
-              splashColor: const Color.fromARGB(255, 43, 236, 4),
-              tooltip: "Submit name",
-              onPressed: this.click,
-            ),
-          ),
-        ),
-      ),
-    );
+    return Center(child: googleLoginButton());
   }
 }

@@ -1,6 +1,6 @@
 # hello_world
 
-A new Flutter project.
+A new Flutter project. (I didnt upload google-services.json to the github)
 
 ## Getting Started
 
