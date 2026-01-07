@@ -1,48 +1,54 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hello_world/database.dart';
 import 'post.dart';
 import 'postList.dart';
 import 'textInputWidget.dart';
 
 class MyHomePage extends StatefulWidget {
-  final String name;
-  MyHomePage(this.name);
+  final User user;
+
+  const MyHomePage(this.user, {super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
+class _MyHomePageState extends State<MyHomePage> {
   List<Post> posts = [];
 
-  void newPost(String text) {
-    this.setState(() {
-      posts.add(new Post(text, widget.name));
+  Future<void> newPost(String text) async {
+    final post = Post(text, widget.user.displayName ?? "Anonymous");
+
+    final postRef = await savePost(post);
+    post.setId(postRef);
+
+    setState(() {
+      posts.add(post);
+    });
+  }
+
+  void updatePosts() async {
+    final loadedPosts = await getAllPosts();
+    setState(() {
+      posts = loadedPosts;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    updatePosts();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Hello World")),
+      appBar: AppBar(title: const Text('Hello World!')),
       body: Column(
         children: <Widget>[
-          Expanded(child: PostList(this.posts)),
-          TextInputWidget(this.newPost),
+          Expanded(child: PostList(posts, widget.user)),
+          TextInputWidget(newPost),
         ],
       ),
     );

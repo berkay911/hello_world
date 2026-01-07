@@ -1,28 +1,31 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'post.dart';
 
 class PostList extends StatefulWidget {
   final List<Post> listItems;
+  final User user;
 
-  PostList(this.listItems);
+  const PostList(this.listItems, this.user, {super.key});
 
   @override
   State<PostList> createState() => _PostListState();
 }
 
 class _PostListState extends State<PostList> {
-  void like(Function callback) {
-    this.setState(() {
-      callback();
+  void like(VoidCallback callBack) {
+    setState(() {
+      callBack();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemCount: this.widget.listItems.length,
+      itemCount: widget.listItems.length,
       itemBuilder: (context, index) {
-        var post = this.widget.listItems[index];
+        final post = widget.listItems[index];
+
         return Card(
           child: Row(
             children: <Widget>[
@@ -34,17 +37,19 @@ class _PostListState extends State<PostList> {
               ),
               Row(
                 children: <Widget>[
-                  Container(
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
                     child: Text(
-                      post.likes.toString(),
-                      style: TextStyle(fontSize: 20),
+                      post.usersLiked.length.toString(),
+                      style: const TextStyle(fontSize: 20),
                     ),
-                    padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
                   ),
                   IconButton(
-                    icon: Icon(Icons.thumb_up),
-                    onPressed: () => this.like(post.likePost),
-                    color: post.userLiked ? Colors.green : Colors.grey,
+                    icon: const Icon(Icons.thumb_up),
+                    onPressed: () => like(() => post.likePost(widget.user)),
+                    color: post.usersLiked.contains(widget.user.uid)
+                        ? Colors.green
+                        : Colors.black,
                   ),
                 ],
               ),

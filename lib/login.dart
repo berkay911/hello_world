@@ -31,20 +31,15 @@ class _BodyState extends State<Body> {
 
   Future<void> click() async {
     final User? result = await signInWithGoogle();
-
     if (result == null) return;
 
-    setState(() {
-      user = result;
-    });
+    user = result;
 
     if (!mounted) return;
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => MyHomePage(result.displayName ?? ''),
-      ),
+      MaterialPageRoute(builder: (context) => MyHomePage(user!)),
     );
   }
 
@@ -64,7 +59,7 @@ class _BodyState extends State<Body> {
             SizedBox(width: 10),
             Text(
               'Sign in with Google',
-              style: TextStyle(color: Colors.grey, fontSize: 20),
+              style: TextStyle(color: Colors.grey, fontSize: 22),
             ),
           ],
         ),
